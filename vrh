@@ -1,6 +1,6 @@
 #!/bin/bash
 END=50
-USER=drake-newell
+USER=
 FORKS=~/.cache/vforks
 VPKG_PATH=~/.local/src/ymir/void-packages
 
