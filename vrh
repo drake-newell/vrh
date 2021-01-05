@@ -34,11 +34,16 @@ PKG=$(ls ~/.cache/void-packages/srcpkgs | dmenu -p "Select package:" -l 20)
 cp -r ~/.cache/void-packages/srcpkgs/$PKG ${VPKG_PATH}/srcpkgs/
 rm -rf ~/.cache/void-packages
 
+cd $VPKG_PATH
+git add srcpkgs/${PKG}
+git commit -am "New package: ${PKG}"
+
 ANS2=$(printf "Yes\\nNo" | dmenu -p "Build ${PKG}?")
 if [ $ANS="Yes" ]; then
-	cd VPKG_PATH
 	notify-send "Building ${PKG}..." "This will likely take a while"
 	./xbps-src pkg $PKG
+	cd
 else
+	cd
 	exit
 fi
