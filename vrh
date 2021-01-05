@@ -1,0 +1,31 @@
+#!/bin/bash
+END=50
+USER=drake-newell
+FORKS=~/.cache/vforks
+VPKG_PATH=~/.local/src/ymir/void-packages
+if [ ! -e $FORKS ]; then
+	notify-send "Updating repository list" "This may take a moment..."
+	for ((i=1;i<=END;i++)); do
+		curl -u $USER:$GITHUB_TOKEN https://api.github.com/repos/void-linux/void-packages/forks?page=$i >> $FORKS
+	done
+	sed -i 's|\(.*\)}.*|\1|' $FORKS
+fi
+
+REPO=$(grep "full_name" $FORKS | cut -f2 -d':' | sed 's/\"//g; s/\,//g; s/ //g' | dmenu -p "Select repository:" -l 20)
+[ -z $REPO ] && exit
+notify-send "Downloading repository" "This may take a moment..."
+git clone --depth 1 https://github.com/${REPO}.git ~/.cache/void-packages
+PKG=$(ls ~/.cache/void-packages/srcpkgs | dmenu -p "Select package:" -l 20)
+[ -z PKG ] && exit
+cp -r ~/.cache/void-packages/srcpkgs/$PKG ${VPKG_PATH}/srcpkgs/
+rm -rf ~/.cache/void-packages
+
+while true; do
+	echo -n "Build ${PKG}? (y/n) "
+	read ans
+	case $ans in
+		[Yy]* ) cd VPKG_PATH; ./xbps-src pkg $PKG; break;;
+		[Nn]* ) exit;;
+		* ) echo "Please answer yes or no.";;
+    	esac
+done
