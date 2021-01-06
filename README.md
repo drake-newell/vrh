@@ -11,8 +11,8 @@ Please note that in order to open the chosen repository in your web browser, you
 * `curl`
 * GNU `sed`
 * GNU `grep`
+* GNU `awk`
+* `xbps-src`
 * web browser
-* `cp`
-* `rm`
 * `printf`
 * `git`
