@@ -1,6 +1,6 @@
 #!/bin/bash
 END=50
-USER=
+GIT_USER=
 FORKS=~/.cache/vforks
 VPKG_PATH=~/.local/src/ymir/void-packages
 
@@ -28,11 +28,11 @@ if [ $ANS1 = "Yes" ]; then
 fi
 
 cd $VPKG_PATH
-GUSER=$(echo $REPO | cut -f1 -d'/')
-git remote add $GUSER https://github.com/${REPO}.git
-git fetch $GUSER
-PKG=$(git ls-files --with-tree $GUSER | grep srcpkgs | cut -f2 -d'/' | awk '!x[$0]++' | dmenu -p "Select package:" -l 20)
-git cherry-pick -x -m 1 $(git log --all --pretty=oneline ${GUSER}/master -- srcpkgs/${PKG} | head -1)
+OWNR=$(echo $REPO | cut -f1 -d'/')
+git remote add $OWNR https://github.com/${REPO}.git
+git fetch $OWNR
+PKG=$(git ls-files --with-tree $OWNR | grep srcpkgs | cut -f2 -d'/' | awk '!x[$0]++' | dmenu -p "Select package:" -l 20)
+git cherry-pick -x -m 1 $(git log --all --pretty=oneline ${OWNR}/master -- srcpkgs/${PKG} | head -1)
 
 ANS2=$(printf "Yes\\nNo" | dmenu -p "Build ${PKG}?")
 if [ $ANS="Yes" ]; then
