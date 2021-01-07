@@ -31,9 +31,8 @@ cd $VPKG_PATH
 GUSER=$(echo $REPO | cut -f1 -d'/')
 git remote add $GUSER https://github.com/${REPO}.git
 git fetch $GUSER
-PKG=$(git ls-files --directory srcpkgs $GUSER | cut -f2 -d'/' | awk '!x[$0]++' | dmenu -p "Select package:" -l 20)
-git merge $(echo $PKG | git log --pretty=format:%H --all ${GUSER}/master -- srcpkgs/${PKG} | head -1)
-git commit -am "Merged package: ${PKG}"
+PKG=$(git ls-files --with-tree $GUSER | grep srcpkgs | cut -f2 -d'/' | awk '!x[$0]++' | dmenu -p "Select package:" -l 20)
+git cherry-pick -x -m 1 $(git log --all --pretty=oneline ${GUSER}/master -- srcpkgs/${PKG} | head -1)
 
 ANS2=$(printf "Yes\\nNo" | dmenu -p "Build ${PKG}?")
 if [ $ANS="Yes" ]; then
