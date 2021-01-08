@@ -2,7 +2,7 @@
 END=50
 GIT_USER=
 FORKS=~/.cache/vforks
-VPKG_PATH=~/.local/src/ymir/void-packages
+VPKG_PATH=~/void-packages
 
 if [ -e $FORKS ]; then
 	if [ $(stat -c '%w' $FORKS | cut -f1 -d' ') != $(date +"%Y-%m-%d") ]; then
@@ -22,6 +22,7 @@ fi
 REPO=$(grep "full_name" $FORKS | cut -f2 -d':' | sed 's/\"//g; s/\,//g; s/ //g' | dmenu -p "Select repository:" -l 20)
 [ -z $REPO ] && exit
 ANS1=$(printf "Yes\\nNo" | dmenu -p "Exit script and explore repository in browser?")
+[ -z $ANS1 ] && exit
 if [ $ANS1 = "Yes" ]; then
 	$BROWSER https://github.com/${REPO}
 	exit
@@ -29,18 +30,17 @@ fi
 
 cd $VPKG_PATH
 OWNR=$(echo $REPO | cut -f1 -d'/')
+[ -z $OWNR ] && exit
 git remote add $OWNR https://github.com/${REPO}.git
 BRNCH=$(git ls-remote --heads $OWNR | cut -f2 -d' ' | cut -f3 -d'/' | dmenu -p 'Select branch (if unsure, select "master")' -l 20)
+[ -z $BRNCH ] && exit
 git fetch $OWNR $BRNCH
-PKG=$(git ls-files --with-tree $OWNR | grep srcpkgs | cut -f2 -d'/' | awk '!x[$0]++' | dmenu -p "Select package:" -l 20)
-git cherry-pick -x -m 1 $(git log --pretty=oneline ${OWNR}/master -- srcpkgs/${PKG} | head -1)
+PKG=$(git ls-files --with-tree ${OWNR}/${BRNCH} | grep srcpkgs | cut -f2 -d'/' | awk '!x[$0]++' | dmenu -p "Select package:" -l 20)
+ [ -z $PKG ] && exit
+git cherry-pick -x -m 1 $(git log --pretty=oneline ${OWNR}/${BRNCH} -- srcpkgs/${PKG} | cut -f1 -d' ' | head -1)
 
-ANS2=$(printf "Yes\\nNo" | dmenu -p "Build ${PKG}?")
-if [ $ANS="Yes" ]; then
+if [ $(printf "Yes\\nNo" | dmenu -p "Build ${PKG}?") = "Yes" ]; then
 	notify-send "Building ${PKG}..." "This will likely take a while"
 	./xbps-src pkg $PKG
 	cd
-else
-	cd
-	exit
 fi
